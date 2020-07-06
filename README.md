@@ -1,5 +1,7 @@
 # Scaramanga
 
+![ci](https://github.com/shempignon/scaramanga/workflows/ci/badge.svg)
+
 [Pacman Mirrorlist generator](https://www.archlinux.org/mirrorlist/) wrapper written in Rust
 
 ## Motivation
