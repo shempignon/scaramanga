@@ -25,12 +25,10 @@ async fn main() -> BoxResult<()> {
     which("pacman").expect("This package automates the process of keeping Pacman mirrorlist up to date, thus requiring the latter to be installed.");
 
     // Read the config from the TOML file
-    let config: Config = get_config()?;
+    let config: Config = get_config("config.toml")?;
 
     // Build the URI from the config
-    let uri = uri::build_uri(&config, &countries::get_countries())?;
-    println!("{}", uri);
-
+    let uri = uri::build_uri(&config, &countries::get_countries());
     // Request the mirrorlist
     let content = reqwest::get(&uri).await?.text().await?;
 

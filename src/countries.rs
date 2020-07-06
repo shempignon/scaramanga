@@ -18,10 +18,6 @@ pub fn get_countries() -> HashMap<String, String> {
     let mut countries = HashMap::new();
 
     countries.insert(
-        "All".to_string().to_lowercase(),
-        "all".to_string().to_lowercase(),
-    );
-    countries.insert(
         "Australia".to_string().to_lowercase(),
         "AU".to_string().to_lowercase(),
     );
@@ -275,4 +271,47 @@ pub fn get_countries() -> HashMap<String, String> {
     );
 
     countries
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_it_has_countries() {
+        assert_eq!(63, get_countries().len());
+    }
+
+    #[test]
+    fn test_it_can_validate_config() -> BoxResult<()> {
+        let countries = Some(vec!["France".to_string()]);
+
+        let config: Config = Config {
+            http: false,
+            https: true,
+            ipv4: false,
+            ipv6: true,
+            countries,
+        };
+
+        assert_eq!((), validate_config(&config)?);
+
+        Ok(())
+    }
+
+    #[test]
+    #[should_panic(expected = "not a country does not provide any pacman mirror")]
+    fn test_it_invalidates_config() {
+        let countries = Some(vec!["not a country".to_string()]);
+
+        let config: Config = Config {
+            http: false,
+            https: true,
+            ipv4: false,
+            ipv6: true,
+            countries,
+        };
+
+        validate_config(&config).unwrap();
+    }
 }

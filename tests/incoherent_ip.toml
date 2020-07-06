@@ -1,0 +1,5 @@
+http = false
+https = true
+ipv4 = false
+ipv6 = false
+countries = ["France", "Belgium"]
