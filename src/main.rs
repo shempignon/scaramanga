@@ -1,3 +1,4 @@
+extern crate pretty_env_logger;
 #[macro_use]
 extern crate log;
 #[macro_use]
@@ -5,18 +6,21 @@ extern crate simple_error;
 
 pub(crate) mod config;
 pub(crate) mod countries;
+mod rank;
 mod uri;
 
 use chrono::{DateTime, Utc};
 use config::{get_config, Config};
-use regex::RegexBuilder;
+use rank::rank_mirrors;
 use std::fs;
 use which::which;
 
-type BoxResult<T> = Result<T, Box<dyn std::error::Error>>;
+type BoxError = Box<dyn std::error::Error>;
+type BoxResult<T> = Result<T, BoxError>;
 
 #[tokio::main]
 async fn main() -> BoxResult<()> {
+    pretty_env_logger::init();
     // Check if running as root
     sudo::escalate_if_needed()?;
     info!("Running as root !");
@@ -40,12 +44,24 @@ async fn main() -> BoxResult<()> {
         format!("/etc/pacman.d/mirrorlist-backup-{}", now.timestamp()),
     )?;
 
-    // Remove the #s
-    let re = RegexBuilder::new(r"^#").multi_line(true).build()?;
-    let replaced = re.replace_all(content.as_str(), "").to_string();
+    // Only keep the revelant lines
+    let relevant_lines = content
+        .lines()
+        .filter_map(Option::Some)
+        .filter(|line| line.to_string().starts_with("#Server = "))
+        .map(|line| line.replace("#Server = ", ""))
+        .collect();
 
+    let ranked_mirrors = rank_mirrors(&relevant_lines)
+        .await?
+        .iter()
+        .map(|line| format!("Server = {}", line))
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    // Rank the servers by speed
     // Paste the new content
-    fs::write("/etc/pacman.d/mirrorlist", replaced)?;
+    fs::write("/etc/pacman.d/mirrorlist", ranked_mirrors)?;
 
     Ok(())
 }
