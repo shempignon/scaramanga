@@ -29,7 +29,7 @@ async fn main() -> BoxResult<()> {
     which("pacman").expect("This package automates the process of keeping Pacman mirrorlist up to date, thus requiring the latter to be installed.");
 
     // Read the config from the TOML file
-    let config: Config = get_config("config.toml")?;
+    let config: Config = get_config("/etc/scaramanga/config.toml")?;
 
     // Build the URI from the config
     let uri = uri::build_uri(&config, &countries::get_countries());
@@ -52,6 +52,7 @@ async fn main() -> BoxResult<()> {
         .map(|line| line.replace("#Server = ", ""))
         .collect();
 
+    // Rank the servers by speed
     let ranked_mirrors = rank_mirrors(&relevant_lines)
         .await?
         .iter()
@@ -59,7 +60,6 @@ async fn main() -> BoxResult<()> {
         .collect::<Vec<String>>()
         .join("\n");
 
-    // Rank the servers by speed
     // Paste the new content
     fs::write("/etc/pacman.d/mirrorlist", ranked_mirrors)?;
 
