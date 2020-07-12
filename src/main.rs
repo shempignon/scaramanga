@@ -1,4 +1,3 @@
-extern crate pretty_env_logger;
 #[macro_use]
 extern crate log;
 #[macro_use]
@@ -20,10 +19,13 @@ type BoxResult<T> = Result<T, BoxError>;
 
 #[tokio::main]
 async fn main() -> BoxResult<()> {
-    pretty_env_logger::init();
+    pretty_env_logger::try_init()?;
+
     // Check if running as root
-    sudo::escalate_if_needed()?;
-    info!("Running as root !");
+    if sudo::check() != sudo::RunningAs::Root {
+        eprintln!("Scaramanga needs root privileges in order to modify /etc/pacman.d/mirrorlist");
+        std::process::exit(1);
+    }
 
     // Check if Pacman is present
     which("pacman").expect("This package automates the process of keeping Pacman mirrorlist up to date, thus requiring the latter to be installed.");
