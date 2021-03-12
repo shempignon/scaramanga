@@ -879,7 +879,7 @@ checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 
 [[package]]
 name = "scaramanga"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "futures",
@@ -888,7 +888,6 @@ dependencies = [
  "reqwest",
  "serde",
  "simple-error",
- "sudo",
  "tokio",
  "toml",
  "uname",
@@ -1024,16 +1023,6 @@ dependencies = [
  "libc",
  "redox_syscall",
  "winapi 0.3.9",
-]
-
-[[package]]
-name = "sudo"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2bf2b1123628eb00199ecd70658741098addfb83892ac3e16821938e8de725e"
-dependencies = [
- "libc",
- "log",
 ]
 
 [[package]]

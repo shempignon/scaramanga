@@ -1,5 +1,6 @@
 use crate::{BoxError, BoxResult};
 use futures::future::join_all;
+use log::info;
 use reqwest::{Client, ClientBuilder};
 use std::time::{Duration, Instant};
 

@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use simple_error::bail;
 use std::fs::File;
 use std::io::prelude::*;
 

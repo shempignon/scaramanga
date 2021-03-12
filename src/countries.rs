@@ -1,5 +1,6 @@
 use crate::config::Config;
 use crate::BoxResult;
+use simple_error::bail;
 use std::collections::HashMap;
 
 pub fn validate_config(config: &Config) -> BoxResult<()> {
