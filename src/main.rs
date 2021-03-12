@@ -33,18 +33,20 @@ async fn main() -> BoxResult<()> {
     let chrono = Instant::now();
 
     // Only keep the revelant lines
-    let relevant_lines = content
+    let relevant_lines: Vec<String> = content
         .lines()
         .filter_map(Option::Some)
         .filter(|line| line.to_string().starts_with("#Server = "))
-        .map(|line| line.replace("#Server = ", ""))
+        .map(|relevant_line| relevant_line.replace("#Server = ", ""))
         .collect();
 
+    let mirrors: Vec<&str> = relevant_lines.iter().map(String::as_ref).collect();
+
     // Rank the servers by speed
-    let ranked_mirrors = rank_mirrors(&relevant_lines)
+    let ranked_mirrors = rank_mirrors(&mirrors.as_slice())
         .await?
         .iter()
-        .map(|line| format!("Server = {}", line))
+        .map(|uri| format!("Server = {}", uri))
         .collect::<Vec<String>>()
         .join("\n");
 

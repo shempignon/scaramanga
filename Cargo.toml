@@ -18,3 +18,7 @@ simple-error = "0.2"
 chrono = "0.4"
 uname = "0.1"
 futures = "0.3"
+
+[dev-dependencies]
+httpmock = "0.5"
+lazy_static = "1.4"
