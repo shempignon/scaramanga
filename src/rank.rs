@@ -4,7 +4,7 @@ use log::info;
 use reqwest::{Client, ClientBuilder};
 use std::time::{Duration, Instant};
 
-pub async fn rank_mirrors(uris: &[&str]) -> BoxResult<Vec<String>> {
+pub async fn rank_mirrors(uris: &[&str]) -> BoxResult<Vec<(String, Duration)>> {
     let client = ClientBuilder::new().timeout(Duration::new(5, 0)).build()?;
 
     let machine = uname::uname()?.machine;
@@ -26,9 +26,7 @@ pub async fn rank_mirrors(uris: &[&str]) -> BoxResult<Vec<String>> {
 
     rankings.sort_by(|(_, a), (_, b)| a.cmp(b));
 
-    let sorted_mirrors: Vec<String> = rankings.into_iter().map(|(mirror, _)| mirror).collect();
-
-    Ok(sorted_mirrors)
+    Ok(rankings)
 }
 
 async fn measure_mirror(client: &Client, mirror: &str, machine: &str) -> BoxResult<Duration> {
@@ -87,14 +85,16 @@ mod tests {
         slow.assert();
         slower.assert();
 
-        assert_eq!(
-            ranked_mirrors,
-            vec![
-                String::from("/fast_mirror"),
-                String::from("/slow_mirror"),
-                String::from("/slower_mirror"),
-            ]
-        );
+        let fast_mirror = &ranked_mirrors[0];
+        let slow_mirror = &ranked_mirrors[1];
+        let slower_mirror = &ranked_mirrors[2];
+
+        assert_eq!("/fast_mirror", fast_mirror.0.as_str());
+        assert!(fast_mirror.1.as_millis() < 200);
+        assert_eq!("/slow_mirror", slow_mirror.0.as_str());
+        assert!(slow_mirror.1.as_millis() < 250);
+        assert_eq!("/slower_mirror", slower_mirror.0.as_str());
+        assert!(slower_mirror.1.as_millis() >= 250);
     }
 
     #[tokio::test]
@@ -109,6 +109,7 @@ mod tests {
         let living_mirrors = (rank_mirrors(&mirrors).await).unwrap();
 
         mirror.assert();
-        assert_eq!(living_mirrors, vec![String::from("/mirror")]);
+
+        assert_eq!("/mirror", (&living_mirrors[0]).0.as_str());
     }
 }
