@@ -5,7 +5,7 @@ use reqwest::{Client, ClientBuilder};
 use std::time::{Duration, Instant};
 
 pub async fn rank_mirrors(uris: &[&str]) -> BoxResult<Vec<(String, Duration)>> {
-    let client = ClientBuilder::new().timeout(Duration::new(5, 0)).build()?;
+    let client = ClientBuilder::new().timeout(Duration::new(2, 0)).build()?;
 
     let machine = uname::uname()?.machine;
 
