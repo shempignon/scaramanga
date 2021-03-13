@@ -2,3 +2,4 @@ http = false
 https = true
 ipv4 = true
 ipv6 = true
+countries = ["France", "Belgium", "Netherlands"]

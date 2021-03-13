@@ -1,5 +1,6 @@
 use crate::config::Config;
 use crate::BoxResult;
+use simple_error::bail;
 use std::collections::HashMap;
 
 pub fn validate_config(config: &Config) -> BoxResult<()> {
@@ -278,12 +279,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_it_has_countries() {
+    fn it_has_countries() {
         assert_eq!(63, get_countries().len());
     }
 
     #[test]
-    fn test_it_can_validate_config() -> BoxResult<()> {
+    fn it_can_validate_config() -> BoxResult<()> {
         let countries = Some(vec!["France".to_string()]);
 
         let config: Config = Config {
@@ -301,7 +302,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected = "not a country does not provide any pacman mirror")]
-    fn test_it_invalidates_config() {
+    fn it_invalidates_config() {
         let countries = Some(vec!["not a country".to_string()]);
 
         let config: Config = Config {

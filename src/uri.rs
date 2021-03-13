@@ -25,7 +25,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_it_build_uri() {
+    fn it_build_uri() {
         let countries_list = crate::countries::get_countries();
 
         get_configs_provider()
