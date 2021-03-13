@@ -6,7 +6,6 @@ mod uri;
 use chrono::{DateTime, Utc};
 use config::{get_config, Config};
 use rank::rank_mirrors;
-use std::time::Instant;
 use which::which;
 
 type BoxError = Box<dyn std::error::Error>;
@@ -30,7 +29,6 @@ async fn main() -> BoxResult<()> {
 
     // Backup the mirrorlist file
     let now: DateTime<Utc> = Utc::now();
-    let chrono = Instant::now();
 
     // Only keep the revelant lines
     let relevant_lines: Vec<String> = content
@@ -46,15 +44,14 @@ async fn main() -> BoxResult<()> {
     let ranked_mirrors = rank_mirrors(&mirrors.as_slice())
         .await?
         .iter()
-        .map(|uri| format!("Server = {}", uri))
+        .map(|(uri, ping)| format!("# Responded in {}ms\nServer = {}", ping.as_millis(), uri))
         .collect::<Vec<String>>()
         .join("\n");
 
     // Print the result
     println!(
-        "# Generated on {} in {}ms\n{}",
+        "# Generated on {}\n{}",
         now.format("%Y-%m-%d at %H:%M"),
-        chrono.elapsed().as_millis(),
         ranked_mirrors
     );
 
