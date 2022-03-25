@@ -41,7 +41,7 @@ async fn main() -> BoxResult<()> {
     let mirrors: Vec<&str> = relevant_lines.iter().map(String::as_ref).collect();
 
     // Rank the servers by speed
-    let ranked_mirrors = rank_mirrors(&mirrors.as_slice())
+    let ranked_mirrors = rank_mirrors(mirrors.as_slice())
         .await?
         .iter()
         .map(|(uri, ping)| format!("# Responded in {}ms\nServer = {}", ping.as_millis(), uri))
