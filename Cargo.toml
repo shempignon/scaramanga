@@ -5,18 +5,18 @@ authors = ["Shempignon <nicolas@pointndots.com>"]
 edition = "2021"
 
 [dependencies]
-reqwest = "0.11.10"
-tokio = { version = "1.19.2", features = ["full"] }
-which = "4.2.5"
+reqwest = "0.11.14"
+tokio = { version = "1.25", features = ["full"] }
+which = "4.4.0"
 log = "0.4.17"
 pretty_env_logger = "0.4.0"
-toml = "0.5.9"
-serde = { version = "1.0.137", features = ["derive"] }
+toml = "0.7.2"
+serde = { version = "1.0.152", features = ["derive"] }
 simple-error = "0.2.3"
-chrono = "0.4.19"
+chrono = "0.4.23"
 uname = "0.1.1"
-futures = "0.3.21"
+futures = "0.3.26"
 
 [dev-dependencies]
-httpmock = "0.6.6"
+httpmock = "0.6.7"
 lazy_static = "1.4.0"
