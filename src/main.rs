@@ -6,7 +6,6 @@ mod uri;
 use chrono::{DateTime, Utc};
 use config::{get_config, Config};
 use rank::rank_mirrors;
-use which::which;
 
 type BoxError = Box<dyn std::error::Error>;
 type BoxResult<T> = Result<T, BoxError>;
@@ -14,9 +13,6 @@ type BoxResult<T> = Result<T, BoxError>;
 #[tokio::main]
 async fn main() -> BoxResult<()> {
     pretty_env_logger::try_init()?;
-
-    // Check if Pacman is present
-    which("pacman").expect("This package automates the process of keeping Pacman mirrorlist up to date, thus requiring the latter to be installed.");
 
     // Read the config from the TOML file
     let config: Config = get_config("/etc/scaramanga/config.toml")?;
