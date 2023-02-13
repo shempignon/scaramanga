@@ -7,13 +7,10 @@ use std::time::{Duration, Instant};
 pub async fn rank_mirrors(uris: &[&str]) -> BoxResult<Vec<(String, Duration)>> {
     let client = ClientBuilder::new().timeout(Duration::new(2, 0)).build()?;
 
-    let machine = uname::uname()?.machine;
-
     let rankings_iter = uris.iter().map(|mirror| {
         let client = &client;
-        let machine = &machine;
         async move {
-            let duration = measure_mirror(client, mirror, machine).await?;
+            let duration = measure_mirror(client, mirror).await?;
             info!("Server {} responded in {}ms", mirror, duration.as_millis());
 
             Ok::<(String, Duration), BoxError>((mirror.to_string(), duration))
@@ -29,10 +26,10 @@ pub async fn rank_mirrors(uris: &[&str]) -> BoxResult<Vec<(String, Duration)>> {
     Ok(rankings)
 }
 
-async fn measure_mirror(client: &Client, mirror: &str, machine: &str) -> BoxResult<Duration> {
+async fn measure_mirror(client: &Client, mirror: &str) -> BoxResult<Duration> {
     let uri = mirror
         .to_string()
-        .replace("$arch", machine)
+        .replace("$arch", "x86_64")
         .replace("$repo", "core");
 
     let now = Instant::now();
