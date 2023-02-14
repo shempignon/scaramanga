@@ -5,7 +5,7 @@ mod uri;
 
 use chrono::{DateTime, Utc};
 use config::{get_config, Config};
-use rank::rank_mirrors;
+use rank::Ranker;
 
 type BoxError = Box<dyn std::error::Error>;
 type BoxResult<T> = Result<T, BoxError>;
@@ -37,10 +37,11 @@ async fn main() -> BoxResult<()> {
     let mirrors: Vec<&str> = relevant_lines.iter().map(String::as_ref).collect();
 
     // Rank the servers by speed
-    let ranked_mirrors = rank_mirrors(mirrors.as_slice())
+    let ranked_mirrors = Ranker::new()?
+        .rank_mirrors(mirrors.as_slice())
         .await?
         .iter()
-        .map(|(uri, ping)| format!("# Responded in {}ms\nServer = {}", ping.as_millis(), uri))
+        .map(|ranked_mirror| ranked_mirror.to_string())
         .collect::<Vec<String>>()
         .join("\n");
 
