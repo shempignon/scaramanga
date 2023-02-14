@@ -1,47 +1,66 @@
-use crate::{BoxError, BoxResult};
+use crate::BoxResult;
 use futures::future::join_all;
-use log::info;
 use reqwest::{Client, ClientBuilder};
-use std::time::{Duration, Instant};
+use std::{
+    fmt::Display,
+    time::{Duration, Instant},
+};
 
-pub async fn rank_mirrors(uris: &[&str]) -> BoxResult<Vec<(String, Duration)>> {
-    let client = ClientBuilder::new().timeout(Duration::new(2, 0)).build()?;
+#[derive(Debug)]
+pub struct RankedMirror(String, Duration);
 
-    let rankings_iter = uris.iter().map(|mirror| {
-        let client = &client;
-        async move {
-            let duration = measure_mirror(client, mirror).await?;
-            info!("Server {} responded in {}ms", mirror, duration.as_millis());
-
-            Ok::<(String, Duration), BoxError>((mirror.to_string(), duration))
-        }
-    });
-
-    let rankings_result = join_all(rankings_iter).await;
-    let mut rankings: Vec<(String, Duration)> =
-        rankings_result.into_iter().filter_map(Result::ok).collect();
-
-    rankings.sort_by(|(_, a), (_, b)| a.cmp(b));
-
-    Ok(rankings)
+impl Display for RankedMirror {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "# Responded in {}ms\nServer = {}",
+            self.1.as_millis(),
+            self.0
+        )
+    }
 }
 
-async fn measure_mirror(client: &Client, mirror: &str) -> BoxResult<Duration> {
-    let uri = mirror
-        .to_string()
-        .replace("$arch", "x86_64")
-        .replace("$repo", "core");
+#[derive(Debug)]
+pub struct Ranker {
+    client: Client,
+}
 
-    let now = Instant::now();
+impl Ranker {
+    pub fn new() -> BoxResult<Self> {
+        let client = ClientBuilder::new().timeout(Duration::new(2, 0)).build()?;
 
-    #[cfg(not(test))]
-    let path = uri;
-    #[cfg(test)]
-    let path = tests::SERVER.url(uri);
+        Ok(Self { client })
+    }
 
-    client.get(path.as_str()).send().await?.error_for_status()?;
+    pub async fn rank_mirrors(&self, uris: &[&str]) -> BoxResult<Vec<RankedMirror>> {
+        let futures = uris.iter().map(|uri| self.measure_mirror(uri));
+        let results = join_all(futures).await;
+        let mut rankings: Vec<RankedMirror> = results.into_iter().filter_map(Result::ok).collect();
+        rankings.sort_by(|a, b| a.1.cmp(&b.1));
+        Ok(rankings)
+    }
 
-    Ok(now.elapsed())
+    async fn measure_mirror(&self, mirror: &str) -> BoxResult<RankedMirror> {
+        let uri = mirror
+            .to_string()
+            .replace("$arch", "x86_64")
+            .replace("$repo", "core");
+
+        let now = Instant::now();
+
+        #[cfg(not(test))]
+        let path = uri;
+        #[cfg(test)]
+        let path = tests::SERVER.url(uri);
+
+        self.client
+            .get(path.as_str())
+            .send()
+            .await?
+            .error_for_status()?;
+
+        Ok(RankedMirror(mirror.to_string(), now.elapsed()))
+    }
 }
 
 #[cfg(test)]
@@ -76,7 +95,8 @@ mod tests {
             then.status(200).body("").delay(slower_delay);
         });
 
-        let ranked_mirrors = (rank_mirrors(&mirrors).await).unwrap();
+        let ranker = Ranker::new().unwrap();
+        let ranked_mirrors = ranker.rank_mirrors(&mirrors).await.unwrap();
 
         fast.assert();
         slow.assert();
@@ -103,7 +123,8 @@ mod tests {
             then.status(200).body("");
         });
 
-        let living_mirrors = (rank_mirrors(&mirrors).await).unwrap();
+        let ranker = Ranker::new().unwrap();
+        let living_mirrors = ranker.rank_mirrors(&mirrors).await.unwrap();
 
         mirror.assert();
 
