@@ -3,9 +3,9 @@ pub(crate) mod countries;
 mod rank;
 mod uri;
 
-use chrono::{DateTime, Utc};
 use config::{get_config, Config};
 use rank::Ranker;
+use time::{format_description::parse, OffsetDateTime};
 
 type BoxError = Box<dyn std::error::Error>;
 type BoxResult<T> = Result<T, BoxError>;
@@ -22,9 +22,6 @@ async fn main() -> BoxResult<()> {
 
     // Request the mirrorlist
     let content = reqwest::get(&uri).await?.text().await?;
-
-    // Backup the mirrorlist file
-    let now: DateTime<Utc> = Utc::now();
 
     // Only keep the revelant lines
     let relevant_lines: Vec<String> = content
@@ -46,11 +43,10 @@ async fn main() -> BoxResult<()> {
         .join("\n");
 
     // Print the result
-    println!(
-        "# Generated on {}\n{}",
-        now.format("%Y-%m-%d at %H:%M"),
-        ranked_mirrors
-    );
+    let format = parse("[year]-[month]-[day] at [hour]:[minute]")?;
+    let now = OffsetDateTime::now_utc().format(&format)?;
+
+    println!("# Generated on {now}\n{ranked_mirrors}");
 
     Ok(())
 }
