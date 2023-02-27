@@ -1,12 +1,11 @@
-use crate::config::Config;
 use crate::BoxResult;
 use simple_error::bail;
 use std::collections::HashMap;
 
-pub fn validate_config(config: &Config) -> BoxResult<()> {
+pub fn validate_countries_list(list: &Option<Vec<String>>) -> BoxResult<()> {
     let countries = get_countries();
 
-    for country in config.countries.as_ref().unwrap_or(&vec![]) {
+    for country in list.as_ref().unwrap_or(&vec![]) {
         if countries.get(&country.to_lowercase()).is_none() {
             bail!("{} does not provide any pacman mirror", country);
         }
@@ -105,35 +104,15 @@ mod tests {
     }
 
     #[test]
-    fn it_can_validate_config() -> BoxResult<()> {
+    fn it_can_validate_config() {
         let countries = Some(vec!["France".to_string()]);
-
-        let config: Config = Config {
-            http: false,
-            https: true,
-            ipv4: false,
-            ipv6: true,
-            countries,
-        };
-
-        assert_eq!((), validate_config(&config)?);
-
-        Ok(())
+        assert_eq!((), validate_countries_list(&countries).unwrap());
     }
 
     #[test]
     #[should_panic(expected = "not a country does not provide any pacman mirror")]
     fn it_invalidates_config() {
         let countries = Some(vec!["not a country".to_string()]);
-
-        let config: Config = Config {
-            http: false,
-            https: true,
-            ipv4: false,
-            ipv6: true,
-            countries,
-        };
-
-        validate_config(&config).unwrap();
+        validate_countries_list(&countries).unwrap();
     }
 }
