@@ -1,9 +1,8 @@
 pub(crate) mod config;
 pub(crate) mod countries;
 mod rank;
-mod uri;
 
-use config::{get_config, Config};
+use config::Config;
 use rank::Ranker;
 use time::{format_description::parse, OffsetDateTime};
 
@@ -15,10 +14,10 @@ async fn main() -> BoxResult<()> {
     pretty_env_logger::try_init()?;
 
     // Read the config from the TOML file
-    let config: Config = get_config("/etc/scaramanga/config.toml")?;
+    let config = Config::new("/etc/scaramanga/config.toml")?;
 
     // Build the URI from the config
-    let uri = uri::build_uri(&config, &countries::get_countries());
+    let uri = config.uri()?;
 
     // Request the mirrorlist
     let content = reqwest::get(&uri).await?.text().await?;
