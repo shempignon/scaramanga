@@ -2,6 +2,7 @@ pub(crate) mod config;
 pub(crate) mod countries;
 mod rank;
 
+use clap::Parser;
 use config::Config;
 use rank::Ranker;
 use time::{format_description::parse, OffsetDateTime};
@@ -9,12 +10,20 @@ use time::{format_description::parse, OffsetDateTime};
 type BoxError = Box<dyn std::error::Error>;
 type BoxResult<T> = Result<T, BoxError>;
 
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    #[arg(short, long, default_value_t = String::from("/etc/scaramanga/config.toml"))]
+    config: String,
+}
+
 #[tokio::main]
 async fn main() -> BoxResult<()> {
     pretty_env_logger::try_init()?;
 
     // Read the config from the TOML file
-    let config = Config::new("/etc/scaramanga/config.toml")?;
+    let args = Args::parse();
+    let config = Config::new(&args.config)?;
 
     // Build the URI from the config
     let uri = config.uri()?;
