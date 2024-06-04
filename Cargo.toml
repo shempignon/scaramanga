@@ -1,6 +1,6 @@
 [package]
 name = "scaramanga"
-version = "0.3.3"
+version = "0.3.4"
 authors = ["Shempignon <nicolas@pointndots.com>"]
 edition = "2021"
 
