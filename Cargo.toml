@@ -5,17 +5,17 @@ authors = ["Shempignon <nicolas@pointndots.com>"]
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.4.12", features = ["derive"] }
-futures = "0.3.30"
-log = "0.4.20"
-pretty_env_logger = "0.5.0"
-reqwest = "0.11.23"
-serde = { version = "1.0.194", features = ["derive"] }
-simple-error = "0.3.0"
-time = { version = "0.3.31", features = ["formatting"] }
-tokio = { version = "1.35.1", features = ["full"] }
-toml = "0.8.8"
+clap = { version = "4.4", features = ["derive"] }
+futures = "0.3"
+log = "0.4"
+pretty_env_logger = "0.5"
+reqwest = "0.11"
+serde = { version = "1.0", features = ["derive"] }
+simple-error = "0.3"
+time = { version = "0.3", features = ["formatting"] }
+tokio = { version = "1.35", features = ["full"] }
+toml = "0.8"
 
 [dev-dependencies]
-httpmock = "0.6.8"
-lazy_static = "1.4.0"
+httpmock = "0.6"
+lazy_static = "1.4"
