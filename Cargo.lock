@@ -1763,7 +1763,7 @@ dependencies = [
 
 [[package]]
 name = "scaramanga"
-version = "0.3.5"
+version = "0.3.7"
 dependencies = [
  "clap",
  "futures",
